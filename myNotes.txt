@@ -1,0 +1,10 @@
+./manage.py runserver 192.168.0.105:8000
+
+# generate migrations
+python manage.py makemigrations
+
+# actually apply generated migrations
+python manage.py migrate
+
+#generate schema
+./manage.py spectacular --file schema.yml
