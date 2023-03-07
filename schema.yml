@@ -93,6 +93,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/EmergencyEvent'
           description: ''
+  /api/emergencyEventRecent/:
+    get:
+      operationId: api_emergencyEventRecent_list
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EmergencyEvent'
+          description: ''
   /schema/:
     get:
       operationId: schema_retrieve
