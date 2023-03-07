@@ -17,7 +17,6 @@ class EmergencyEventShortSerializer(serializers.ModelSerializer):
         model = EmergencyEvent
         fields = ('id', 'latitude', 'longitude', 'citizenId')
 
-
 class EmergencyEventSerializer(serializers.ModelSerializer):
     citizen = CitizenSerializer()
     class Meta:

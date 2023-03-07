@@ -13,10 +13,11 @@ class EmergencyEvent(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
     createdDateTime = models.DateTimeField(auto_now_add=True)
+    checked = models.BooleanField(default=False)
     citizen = models.ForeignKey(Citizen, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.citizen.lastName + ', ' + str(self.latitude) + ', ' + str(self.longitude)
+        return self.citizen.lastName + ', ' + str(self.latitude) + ', ' + str(self.longitude) + ', ' + str(self.checked)
 
 class AccessedTime(models.Model):
     accessedTime = models.DateTimeField()
