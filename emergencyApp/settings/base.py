@@ -26,6 +26,8 @@ SECRET_KEY = 'django-insecure-mmm5vw_+6xc=m3$!u=tg$jri!+)tz&a!&oucopf&=#066+5(kq
 # Application definition
 
 INSTALLED_APPS = [
+    'channels', 
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -38,6 +40,8 @@ INSTALLED_APPS = [
     # Internal Apps
     'emergencyApp.emergencyEvent',
 ]
+
+ASGI_APPLICATION = 'emergencyApp.asgi.application'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

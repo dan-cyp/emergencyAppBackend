@@ -9,6 +9,7 @@ from drf_spectacular.utils import extend_schema
 
 from .models import Citizen, EmergencyEvent, AccessedTime
 from .serializers import CitizenSerializer, EmergencyEventShortSerializer, EmergencyEventSerializer, AccessedTimeSerializer
+from .consumers import EmergencyEventConsumer
 
 class CitizenViewSet(viewsets.ViewSet):
 
@@ -52,8 +53,18 @@ class EmergencyEventViewSet(viewsets.ViewSet):
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             print("EMERGENCY: " + str(request.data))
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
             serializer.save()
             transaction.commit()
+
+            # SENDING THIS MESSAGE TO WEB SOCKET CONSUMERS
+            # EmergencyEventConsumer.sendMessage(request.data)
+            emergency_event_consumer = EmergencyEventConsumer()
+
+            # call the sendMessage method on the instance to send a message
+            message = {'type': 'some_type', 'message': 'Hello, World!'}
+            emergency_event_consumer.sendMessage(message)
+
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
@@ -88,43 +99,5 @@ class EmergencyEventHasNewViewSet(viewsets.ViewSet):
 
         return Response(response)
     
-
-    # @extend_schema(responses=EmergencyEventSerializer)
-    # def list(self, request):
-    #     # Get last AccessTime Point
-    #     atQueryset = AccessedTime.objects.all()
-    #     atSerializer = AccessedTimeSerializer(atQueryset.last())
-    #     lastAccessedTimeDb = atSerializer.data
-
-    #     # Get all EmergencyEvents
-    #     eeQueryset = EmergencyEvent.objects.all()
-    #     eeSerializer = EmergencyEventSerializer(eeQueryset, many=True)
-
-    #     if lastAccessedTimeDb is None:
-    #         print('No last access time')
-    #     else:
-    #         # Filter since last access time
-    #         accessedTimeStr = lastAccessedTimeDb['accessedTime']
-    #         accessedTime = datetime.strptime(accessedTimeStr, '%Y-%m-%dT%H:%M:%S.%fZ')
-
-    #         newEmergencyEvents = []
-    #         for ee in eeSerializer.data:
-    #             createdDateTime = datetime.strptime(ee['createdDateTime'], '%Y-%m-%dT%H:%M:%S.%fZ')
-    #             if createdDateTime > accessedTime:
-    #                 newEmergencyEvents.append(ee)
-
-    #         # Log new accessedTime
-    #         newAccessTime = {'accessedTime': datetime.now()}
-    #         atSerializer = AccessedTimeSerializer(data=newAccessTime)
-    #         if(atSerializer.is_valid()):
-    #             atSerializer.save()
-
-    #         return Response(newEmergencyEvents)
-                
-        
-    #     # Log new accessedTime
-    #     newAccessTime = {'accessedTime': datetime.now()}
-    #     atSerializer = AccessedTimeSerializer(data=newAccessTime)
-    #     if(atSerializer.is_valid()):
-    #         atSerializer.save()
-    #     return Response(eeSerializer.data)
+def lobby(request):
+    return render(request, 'emergencyEvent/lobby.html')
