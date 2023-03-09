@@ -3,6 +3,7 @@ from datetime import datetime
 from django.shortcuts import render
 from django.utils.cache import patch_cache_control
 from django.db import transaction
+from django.forms.models import model_to_dict
 from rest_framework import viewsets
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
@@ -54,7 +55,7 @@ class EmergencyEventViewSet(viewsets.ViewSet):
         serializer = EmergencyEventShortSerializer(data=request.data)
         if serializer.is_valid():
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            print("EMERGENCY: " + str(request.data))
+            print("NEW EMERGENCY: " + str(request.data))
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
             serializer.save()
@@ -64,14 +65,15 @@ class EmergencyEventViewSet(viewsets.ViewSet):
             # Retrieve the channel layer
             channel_layer = get_channel_layer()
             group_name = "emergencyEvents"
-            #responseNotification = serializer.data
-            #responseNotification["type"] = "send_message"
-            queryset = EmergencyEvent.objects.all()
-            serializer2 = EmergencyEventSerializer(queryset, many=True)
-            emergencyEventNotification = serializer2.data[len(serializer2.data)-1]
-            emergencyEventNotification["type"] = "send_message"
 
-            async_to_sync(channel_layer.group_send)(group_name, emergencyEventNotification)
+            print(serializer.data)
+
+            newEmergencyEventModel = EmergencyEvent.objects.get(id=serializer.data['id'])
+            serializerNew = EmergencyEventSerializer(newEmergencyEventModel)
+            newEmergencyEvent = serializerNew.data
+            # this needs to be there in order to send
+            newEmergencyEvent["type"] = "send_message"
+            async_to_sync(channel_layer.group_send)(group_name, newEmergencyEvent)
 
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
