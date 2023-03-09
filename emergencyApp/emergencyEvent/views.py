@@ -64,9 +64,14 @@ class EmergencyEventViewSet(viewsets.ViewSet):
             # Retrieve the channel layer
             channel_layer = get_channel_layer()
             group_name = "emergencyEvents"
-            responseNotification = serializer.data
-            responseNotification["type"] = "send_message"
-            async_to_sync(channel_layer.group_send)(group_name, responseNotification)
+            #responseNotification = serializer.data
+            #responseNotification["type"] = "send_message"
+            queryset = EmergencyEvent.objects.all()
+            serializer2 = EmergencyEventSerializer(queryset, many=True)
+            emergencyEventNotification = serializer2.data[len(serializer2.data)-1]
+            emergencyEventNotification["type"] = "send_message"
+
+            async_to_sync(channel_layer.group_send)(group_name, emergencyEventNotification)
 
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
