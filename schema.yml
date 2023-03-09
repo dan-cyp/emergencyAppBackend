@@ -74,13 +74,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EmergencyEventShort'
+              $ref: '#/components/schemas/EmergencyEventReceive'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/EmergencyEventShort'
+              $ref: '#/components/schemas/EmergencyEventReceive'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/EmergencyEventShort'
+              $ref: '#/components/schemas/EmergencyEventReceive'
         required: true
       security:
       - cookieAuth: []
@@ -267,9 +267,10 @@ components:
           readOnly: true
         citizen:
           $ref: '#/components/schemas/Citizen'
-        pos:
-          type: object
-          additionalProperties: {}
+        poss:
+          type: array
+          items:
+            $ref: '#/components/schemas/Location'
         createdDateTime:
           type: string
           format: date-time
@@ -280,8 +281,8 @@ components:
       - citizen
       - createdDateTime
       - id
-      - pos
-    EmergencyEventShort:
+      - poss
+    EmergencyEventReceive:
       type: object
       properties:
         id:
@@ -292,11 +293,26 @@ components:
           additionalProperties: {}
         citizenId:
           type: integer
-          nullable: true
       required:
       - citizenId
       - id
       - pos
+    Location:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        lat:
+          type: number
+          format: double
+        lng:
+          type: number
+          format: double
+      required:
+      - id
+      - lat
+      - lng
   securitySchemes:
     basicAuth:
       type: http

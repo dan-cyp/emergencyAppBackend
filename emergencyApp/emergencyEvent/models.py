@@ -8,29 +8,18 @@ class Citizen(models.Model):
     def __str__(self):
         return self.firstName + ' ' + self.lastName
 
+class Location(models.Model):
+    lat = models.FloatField()
+    lng = models.FloatField()
 
-# class EmergencyEvent(models.Model):
-#     latitude = models.FloatField()
-#     longitude = models.FloatField()
-#     createdDateTime = models.DateTimeField(auto_now_add=True)
-#     checked = models.BooleanField(default=False)
-#     citizen = models.ForeignKey(Citizen, on_delete=models.CASCADE)
-
-#     def __str__(self):
-#         return self.citizen.lastName + ', ' + str(self.latitude) + ', ' + str(self.longitude) + ', ' + str(self.checked)
+    def __str__(self):
+        return self.lat + ", " + self.lng
 
 class EmergencyEvent(models.Model):
-    pos = models.JSONField(null=True)
-    posArray = models.TextField(default="[]")
     createdDateTime = models.DateTimeField(auto_now_add=True)
     checked = models.BooleanField(default=False)
+    poss = models.ManyToManyField(Location)
     citizen = models.ForeignKey(Citizen, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.citizen.lastName + ', ' + str(self.pos) + ', ' + str(self.checked)
-
-# class AccessedTime(models.Model):
-#     accessedTime = models.DateTimeField()
-
-#     def __str__(self):
-#         return self.accessedTime
+        return self.citizen.lastName + ', ' + str(self.poss) + ', ' + str(self.checked)
