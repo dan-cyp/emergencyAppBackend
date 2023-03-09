@@ -93,18 +93,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/EmergencyEvent'
           description: ''
-  /api/emergencyEventHasNew/:
-    get:
-      operationId: api_emergencyEventHasNew_retrieve
-      tags:
-      - api
-      security:
-      - cookieAuth: []
-      - basicAuth: []
-      - {}
-      responses:
-        '200':
-          description: No response body
   /schema/:
     get:
       operationId: schema_retrieve
@@ -279,12 +267,9 @@ components:
           readOnly: true
         citizen:
           $ref: '#/components/schemas/Citizen'
-        latitude:
-          type: number
-          format: double
-        longitude:
-          type: number
-          format: double
+        pos:
+          type: object
+          additionalProperties: {}
         createdDateTime:
           type: string
           format: date-time
@@ -295,28 +280,23 @@ components:
       - citizen
       - createdDateTime
       - id
-      - latitude
-      - longitude
+      - pos
     EmergencyEventShort:
       type: object
       properties:
         id:
           type: integer
           readOnly: true
-        latitude:
-          type: number
-          format: double
-        longitude:
-          type: number
-          format: double
+        pos:
+          type: object
+          additionalProperties: {}
         citizenId:
           type: integer
           nullable: true
       required:
       - citizenId
       - id
-      - latitude
-      - longitude
+      - pos
   securitySchemes:
     basicAuth:
       type: http

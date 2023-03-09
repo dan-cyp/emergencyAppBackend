@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Citizen, EmergencyEvent, AccessedTime
+from .models import Citizen, EmergencyEvent#, AccessedTime
 
 class CitizenSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,17 +13,20 @@ class EmergencyEventShortSerializer(serializers.ModelSerializer):
         source="citizen",
         allow_null=True
     )
+    
+    pos = serializers.JSONField()
+    
     class Meta:
         model = EmergencyEvent
-        fields = ('id', 'latitude', 'longitude', 'citizenId')
+        fields = ('id', 'pos', 'citizenId')
+    
+    def create(self, validated_data):
+        validated_data['posArray'] = "[" + str(validated_data['pos']) + "]"
+        return super().create(validated_data)
 
 class EmergencyEventSerializer(serializers.ModelSerializer):
     citizen = CitizenSerializer()
+    pos = serializers.JSONField()
     class Meta:
         model = EmergencyEvent
-        fields = "__all__"
-
-class AccessedTimeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AccessedTime
         fields = "__all__"
