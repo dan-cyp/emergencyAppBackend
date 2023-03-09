@@ -13,3 +13,10 @@ DATABASES = {
 }
 
 DISABLE_QUERYSET_CACHE = True
+
+# REDIS LOCAL
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}

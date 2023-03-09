@@ -1,27 +1,51 @@
-import time
 import json
-from channels.generic.websocket import WebsocketConsumer
+from channels.generic.websocket import AsyncWebsocketConsumer
 
-class EmergencyEventConsumer(WebsocketConsumer):
-    # def sendRandomData(self):
-    #     self.send(text_data=json.dumps({
-            
-    # })) 
+class EmergencyEventConsumer(AsyncWebsocketConsumer):
 
-    def connect(self):
-        self.accept()
+    async def connect(self):
+        self.group_name = 'emergencyEvents'
 
-        print("New connection established")
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
 
-        self.send(text_data=json.dumps({
-            'type':'connection_established',
-            'message':'You are now connected!'
-        }))
-        while True:
-            self.sendMessage({'message':'123'})
-            time.sleep(1)
+        await self.accept()
     
-    def sendMessage(self, message):
-        self.send(text_data=json.dumps(message))
+    async def disconnect(self, close_code):
+        # leave group
+        await self.channel_layer.group_discard(self.group_name, self.channel_name)
+
+    # Receive message from websocket
+    async def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        lat = text_data_json["lat"]
+        lng = text_data_json["lat"]
+
+        event = {
+            "type": "send_message",
+            "lat": lat,
+            "lng": lng
+        }
+
+        await self.channel_layer.group_send(self.group_name, event)
+
+    
+    async def send_message(self, event):
+        lat = event['lat']
+        lng = event['lng']
+
+        await self.send(text_data=json.dumps(
+            {
+                "id": 1,
+                "citizen": {
+                    "id": 1,
+                    "firstName": "joe mama",
+                    "lastName": "last",
+                    "phoneNumber": "123456789"
+                },
+                "latitude": lat, 
+                "longitude": lng,
+                "createdDateTime": "2023-03-09T08:06:07.612Z",
+                "checked": False
+        }))
 
          

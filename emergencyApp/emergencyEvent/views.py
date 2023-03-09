@@ -7,6 +7,9 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+
 from .models import Citizen, EmergencyEvent, AccessedTime
 from .serializers import CitizenSerializer, EmergencyEventShortSerializer, EmergencyEventSerializer, AccessedTimeSerializer
 from .consumers import EmergencyEventConsumer
@@ -58,13 +61,16 @@ class EmergencyEventViewSet(viewsets.ViewSet):
             transaction.commit()
 
             # SENDING THIS MESSAGE TO WEB SOCKET CONSUMERS
-            # EmergencyEventConsumer.sendMessage(request.data)
-            emergency_event_consumer = EmergencyEventConsumer()
-
-            # call the sendMessage method on the instance to send a message
-            message = {'type': 'some_type', 'message': 'Hello, World!'}
-            emergency_event_consumer.sendMessage(message)
-
+            # Retrieve the channel layer
+            channel_layer = get_channel_layer()
+            group_name = "emergencyEvents"
+            event = {
+                "type": "send_message",
+                "lat": 1,
+                "lng": 2
+            }
+            async_to_sync(channel_layer.group_send)(group_name, event)
+            
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
