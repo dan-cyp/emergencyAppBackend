@@ -17,7 +17,7 @@ class LocationSerializer(serializers.ModelSerializer):
 
 class EmergencyEventReceiveSerializer(serializers.ModelSerializer):
     citizenId = serializers.IntegerField(write_only=True)
-    pos = serializers.DictField(write_only=True)
+    pos = LocationSerializer()
 
     class Meta:
         model = EmergencyEvent
