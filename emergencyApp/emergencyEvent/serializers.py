@@ -16,22 +16,20 @@ class LocationSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']
 
 class EmergencyEventReceiveSerializer(serializers.ModelSerializer):
-    citizenId = serializers.IntegerField()
-
-    pos = serializers.JSONField()
+    citizenId = serializers.IntegerField(write_only=True)
+    pos = serializers.DictField(write_only=True)
 
     class Meta:
         model = EmergencyEvent
-        fields = ['id', 'citizenId', 'pos']
+        fields = ['citizenId', 'pos']
 
     def create(self, validated_data):
-        citizen_id = validated_data.pop('citizenId')
-        citizen = Citizen.objects.get(id=citizen_id)
+        citizenId = validated_data.pop('citizenId')
+        citizen = Citizen.objects.get(id=citizenId)
         pos_data = validated_data.pop('pos')
         event = EmergencyEvent.objects.create(citizen=citizen, **validated_data)
-        for loc_data in pos_data.values():
-            location = Location.objects.create(**loc_data)
-            event.poss.add(location)
+        location = Location.objects.create(lat=pos_data['lat'], lng=pos_data['lng'])
+        event.poss.add(location)
         return event
 
 

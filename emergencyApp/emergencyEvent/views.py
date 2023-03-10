@@ -66,8 +66,10 @@ class EmergencyEventViewSet(viewsets.ViewSet):
                 if ee["citizen"]["id"] == citizenId:
                     emergencyEventsCitizen.append(ee)
 
+            latestEmergencyEvent = emergencyEventsCitizen[len(emergencyEventsCitizen) - 1]
+
             # CREATE NEW EmergencyEvent - nothing yet there
-            if len(emergencyEventsCitizen) == 0:
+            if len(emergencyEventsCitizen) == 0 or latestEmergencyEvent["checked"]:
                 print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 print("NEW EMERGENCY: " + str(request.data))
                 print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -76,33 +78,21 @@ class EmergencyEventViewSet(viewsets.ViewSet):
                 # notify channels!!! <-- HERE -->
                 return Response(serializer.data, status=201)
             else:
-                latestEmergencyEvent = emergencyEventsCitizen[len(emergencyEventsCitizen) - 1]
-                # CREATE NEW EmergencyEvent - because last was closed
-                if(latestEmergencyEvent["checked"]):
-                    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                    print("NEW EMERGENCY: " + str(request.data))
-                    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                    serializer.save()
-                    transaction.commit()
-                    # notify channels!!! <-- HERE -->
-                    return Response(serializer.data, status=201)
-                # UPDATE EXISTING
-                else:
-                    print("SHOULD UPDATEEEEEEEE")
-                    # get by id and update
-                    idOfLatestEmergencyEvent = latestEmergencyEvent["id"]
-                    poss = latestEmergencyEvent["poss"]
-                    newPos = request.data["pos"]
-                    poss.append(newPos)
+                print("SHOULD UPDATEEEEEEEE")
+                # get by id and update
+                idOfLatestEmergencyEvent = latestEmergencyEvent["id"]
+                poss = latestEmergencyEvent["poss"]
+                newPos = request.data["pos"]
+                poss.append(newPos)
 
-                    emergencyEventToUpdate = self.querysetZero.get(id=idOfLatestEmergencyEvent)
+                emergencyEventToUpdate = self.querysetZero.get(id=idOfLatestEmergencyEvent)
 
-                    serializerToUpdate = self.serializerZero(emergencyEventToUpdate, {"poss": poss} , partial=True)
-                    serializerToUpdate.is_valid(raise_exception=True)
-                    serializerToUpdate.save()
-                    # notify channels!!! <-- HERE -->
-                    print("UPDATEEEEED SUCCESFULLY")
-                    return Response(serializerToUpdate.data, status=200)
+                serializerToUpdate = self.serializerZero(emergencyEventToUpdate, {"poss": poss} , partial=True)
+                serializerToUpdate.is_valid(raise_exception=True)
+                serializerToUpdate.save()
+                # notify channels!!! <-- HERE -->
+                print("UPDATEEEEED SUCCESFULLY")
+                return Response(serializerToUpdate.data, status=200)
 
         return Response(serializer.errors, status=400)
 
