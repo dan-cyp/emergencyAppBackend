@@ -23,7 +23,7 @@ from emergencyApp.emergencyEvent import views
 router = DefaultRouter()
 router.register(r"citizen", views.CitizenViewSet, basename='citizen')
 router.register(r"emergencyEvent", views.EmergencyEventViewSet, basename='emergencyEvent')
-#router.register(r"emergencyEventHasNew", views.EmergencyEventHasNewViewSet, basename='emergencyEventHasNew')
+router.register(r"emergencyEventConfirm", views.EmergencyEventConfirmationViewSet, basename='emergencyEventHasNew')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

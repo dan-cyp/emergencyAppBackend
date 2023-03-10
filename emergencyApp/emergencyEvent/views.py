@@ -5,6 +5,8 @@ from django.shortcuts import render
 from django.utils.cache import patch_cache_control
 from django.db import transaction
 from django.forms.models import model_to_dict
+
+from django.http import JsonResponse
 from rest_framework import viewsets
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
@@ -13,7 +15,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
 from .models import Citizen, EmergencyEvent#, AccessedTime
-from .serializers import CitizenSerializer, EmergencyEventReceiveSerializer, EmergencyEventSerializer#, AccessedTimeSerializer
+from .serializers import CitizenSerializer, EmergencyEventReceiveSerializer, EmergencyEventSerializer, EmergencyEventConfirmationSerializer
 from .consumers import EmergencyEventConsumer
 
 class CitizenViewSet(viewsets.ViewSet):
@@ -98,10 +100,21 @@ class EmergencyEventViewSet(viewsets.ViewSet):
                     serializerToUpdate = self.serializerZero(emergencyEventToUpdate, {"poss": poss} , partial=True)
                     serializerToUpdate.is_valid(raise_exception=True)
                     serializerToUpdate.save()
+                    # notify channels!!! <-- HERE -->
                     print("UPDATEEEEED SUCCESFULLY")
                     return Response(serializerToUpdate.data, status=200)
 
         return Response(serializer.errors, status=400)
-    
+
+class EmergencyEventConfirmationViewSet(viewsets.ViewSet):
+    serializer_class = EmergencyEventConfirmationSerializer
+
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return JsonResponse({"message": "Successfully confirmed event"})
+
 def lobby(request):
     return render(request, 'emergencyEvent/lobby.html')

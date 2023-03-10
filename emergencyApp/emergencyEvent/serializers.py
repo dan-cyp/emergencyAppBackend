@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.shortcuts import get_object_or_404
 
 from .models import Citizen, EmergencyEvent, Location#, AccessedTime
 
@@ -6,11 +7,13 @@ class CitizenSerializer(serializers.ModelSerializer):
     class Meta:
         model = Citizen
         fields = "__all__"
+        read_only_fields = ['id']
 
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
         fields = "__all__"
+        read_only_fields = ['id']
 
 class EmergencyEventReceiveSerializer(serializers.ModelSerializer):
     citizenId = serializers.IntegerField()
@@ -19,7 +22,7 @@ class EmergencyEventReceiveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EmergencyEvent
-        fields = ('id', 'pos', 'citizenId')
+        fields = ['id', 'citizenId', 'pos']
 
     def create(self, validated_data):
         citizen_id = validated_data.pop('citizenId')
@@ -38,7 +41,8 @@ class EmergencyEventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EmergencyEvent
-        fields = ('id', 'citizen', 'poss', 'createdDateTime', 'checked')
+        fields = ['id', 'citizen', 'poss', 'createdDateTime', 'checked']
+        read_only_fields = ['id', 'citizen', 'poss', 'createdDateTime']
     
     def update(self, instance, validated_data):
         poss_data = validated_data.pop('poss', None)
@@ -47,3 +51,13 @@ class EmergencyEventSerializer(serializers.ModelSerializer):
             location = Location.objects.create(**pos)
             instance.poss.add(location)  # add the new location to the event
         return super().update(instance, validated_data)
+
+class EmergencyEventConfirmationSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+
+    def create(self, validated_data):
+        emergency_event_id = validated_data.pop('id')
+        emergency_event = get_object_or_404(EmergencyEvent, id=emergency_event_id)
+        emergency_event.checked = validated_data.get('checked', True)
+        emergency_event.save()
+        return emergency_event

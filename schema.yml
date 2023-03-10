@@ -93,6 +93,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/EmergencyEvent'
           description: ''
+  /api/emergencyEventConfirm/:
+    post:
+      operationId: api_emergencyEventConfirm_create
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          description: No response body
   /schema/:
     get:
       operationId: schema_retrieve
@@ -247,10 +259,10 @@ components:
           readOnly: true
         firstName:
           type: string
-          maxLength: 100
+          maxLength: 255
         lastName:
           type: string
-          maxLength: 200
+          maxLength: 255
         phoneNumber:
           type: string
           maxLength: 20
@@ -277,7 +289,9 @@ components:
           readOnly: true
         checked:
           type: boolean
+          readOnly: true
       required:
+      - checked
       - citizen
       - createdDateTime
       - id
@@ -288,11 +302,11 @@ components:
         id:
           type: integer
           readOnly: true
+        citizenId:
+          type: integer
         pos:
           type: object
           additionalProperties: {}
-        citizenId:
-          type: integer
       required:
       - citizenId
       - id
